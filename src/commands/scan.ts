@@ -10,7 +10,7 @@ import log from "../lib/log";
 export default class Scan extends Command {
   static description = "describe the command here";
 
-  static examples = ["$ github-secret-scanner scan"];
+  static examples = ["$ git-secret-scanner scan"];
 
   static flags = {
     help: flags.help({ char: "h" }),

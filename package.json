@@ -1,11 +1,11 @@
 {
-  "name": "github-secret-scanner",
+  "name": "git-secret-scanner",
   "version": "0.1.0",
   "author": "Justin Taylor @jsdtaylor",
   "bin": {
-    "github-secret-scanner": "./bin/run"
+    "git-secret-scanner": "./bin/run"
   },
-  "bugs": "https://github.com/jsdtaylor/github-secret-scanner/issues",
+  "bugs": "https://github.com/jsdtaylor/git-secret-scanner/issues",
   "dependencies": {
     "@oclif/command": "^1",
     "@oclif/config": "^1",
@@ -43,7 +43,7 @@
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json"
   ],
-  "homepage": "https://github.com/jsdtaylor/github-secret-scanner",
+  "homepage": "https://github.com/jsdtaylor/git-secret-scanner",
   "keywords": [
     "oclif"
   ],
@@ -51,12 +51,12 @@
   "main": "lib/index.js",
   "oclif": {
     "commands": "./lib/commands",
-    "bin": "github-secret-scanner",
+    "bin": "git-secret-scanner",
     "plugins": [
       "@oclif/plugin-help"
     ]
   },
-  "repository": "jsdtaylor/github-secret-scanner",
+  "repository": "jsdtaylor/git-secret-scanner",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
