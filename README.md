@@ -1,7 +1,7 @@
 git-secret-scanner
 =====================
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+[![npm version](https://badge.fury.io/js/git-secret-scanner.svg)](https://badge.fury.io/js/git-secret-scanner)
 
 * [Installation](#installation)
 * [Commands](#commands)
