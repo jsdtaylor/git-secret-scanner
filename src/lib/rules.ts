@@ -1,4 +1,6 @@
 export enum RuleType {
+  API_KEY = "API_KEY",
+  API_TOKEN = "API_TOKEN",
   AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID",
   AWS_SECRET_ACCESS_KEY = "AWS_SECRET_ACCESS_KEY",
   PASSWORD = "PASSWORD",
@@ -15,17 +17,25 @@ export type Rules = Partial<Record<RuleType, Rule>>;
  */
 
 export const rules: Rules = {
+  API_KEY: {
+    name: "API key",
+    pattern: /((?:\"|')?\S*(?:API_KEY)\S*(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?.*(?:\"|')?)/g,
+  },
+  API_TOKEN: {
+    name: "API token",
+    pattern: /((?:\"|')?\S*(?:API_TOKEN)\S*(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?.*(?:\"|')?)/g,
+  },
   AWS_ACCESS_KEY_ID: {
     name: "AWS Access Key ID",
     pattern: /((?:A3T[A-Z0-9]|AKIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ASIA)[A-Z0-9]{16})/g,
   },
   AWS_SECRET_ACCESS_KEY: {
     name: "AWS Secret Access Key",
-    pattern: /((?:\"|')?(?:AWS|aws|Aws)?_?(?:SECRET|secret|Secret)_?(?:ACCESS|access|Access)?_?(?:KEY|key|Key)(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?[A-Za-z0-9/\+=]{40}(?:\"|')?)/g,
+    pattern: /((?:\"|')?(?:aws)?_?(?:secret)_?(?:access)?_?(?:key)(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?[a-z0-9/\+=]{40}(?:\"|')?)/gi,
   },
   PASSWORD: {
     name: "Password",
-    pattern: /((?:password|_pass|_pw)\s*(?::|=>|=)\s*[^\s]+)/gi,
-    filterEntry: /.*\.ini/i,
+    pattern: /((?:password|_pass|_pw)[^\S\r\n]*(?::|=>|=)[^\S\r\n]*(?:(?!\"\"|\'\'|null).)+)/gi,
+    filterEntry: /.*\.ini|\.env.*/i,
   },
 };

@@ -8,18 +8,26 @@ import log from "../lib/log";
 import { rules, RuleType } from "../lib/rules";
 
 export default class Scan extends Command {
-  static description = "describe the command here";
+  static description = "scans local git repositories for committed secrets";
 
-  static examples = ["$ git-secret-scanner scan"];
+  static examples = ["$ git-secret-scanner scan ~/code/github.com/my-org -r"];
 
   static flags = {
     help: flags.help({ char: "h" }),
+    pull: flags.boolean({ char: "p", description: "pull from repositories" }),
+    redact: flags.boolean({
+      char: "r",
+      description: "redact all matched secret strings",
+    }),
   };
 
   static args = [{ name: "dir" }];
 
   async run() {
-    const { args } = (this.parse(Scan) as unknown) as { args: { dir: string } };
+    const { args, flags } = (this.parse(Scan) as unknown) as {
+      args: { dir: string };
+      flags: { pull: boolean; redact: boolean };
+    };
 
     const ctx: ScanContext = { summary: { findings: [] } };
 
@@ -35,13 +43,12 @@ export default class Scan extends Command {
         matches.forEach((matched) => {
           blobString.split("\n").forEach((line, i) => {
             if (line.includes(matched)) {
+              const valuePart = flags.redact ? "" : `found ${matched} `;
               const finding: Finding = {
                 ruleType,
-                detail: `found ${matched} in ${entry.toString()} on line ${
-                  i + 1
-                }`,
+                detail: `${valuePart}in ${entry.toString()} on line ${i + 1}`,
               };
-              ctx.summary?.findings.push(finding)
+              ctx.summary?.findings.push(finding);
               log.warn(`[ ${finding.ruleType} ] ${finding.detail}`);
             }
           });
@@ -71,9 +78,21 @@ export default class Scan extends Command {
     };
 
     const scanRepoDir = async (dir: string) => {
-      log.info(`scanning ${dir}...`);
+      log.info(`scanning ${dir}`);
       try {
         const repo = await nodegit.Repository.open(path.resolve(dir));
+        if (flags.pull) {
+          log.info("fetching from remotes...");
+          await repo.fetchAll({
+            callbacks: {
+              certificateCheck: () => 0,
+              credentials: (_url: string, user: string) => {
+                log.debug(`fetching from ${_url}`);
+                return nodegit.Cred.sshKeyFromAgent(user);
+              },
+            },
+          });
+        }
         const commit = await repo.getMasterCommit();
         log.info(`analysing files at commit ${commit.toString()}`);
         const tree = await commit.getTree();
@@ -99,7 +118,7 @@ export default class Scan extends Command {
           const stat = await fs.promises.stat(fullPath);
           if (stat.isDirectory()) await scanRepoDir(fullPath);
         }
-      }
+      } else await scanRepoDir(resolvedDir);
     } catch (e) {
       log.error(e, "SCAN FAILED");
       this.exit(1);
