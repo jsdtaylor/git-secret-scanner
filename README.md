@@ -1,22 +1,19 @@
 git-secret-scanner
 =====================
 
-
-
 [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 
-<!-- toc -->
 * [Installation](#installation)
 * [Commands](#commands)
-<!-- tocstop -->
+
 # Installation
-<!-- usage -->
+
 ```sh-session
 $ yarn add -g git-secret-scanner
 ```
-<!-- usagestop -->
+
 # Commands
-<!-- commands -->
+
 * [`git-secret-scanner scan DIR`](#git-secret-scanner-scan)
 
 ## `git-secret-scanner scan DIR`
