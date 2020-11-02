@@ -3,9 +3,9 @@ import * as fs from "fs";
 import { Command, flags } from "@oclif/command";
 import * as nodegit from "nodegit";
 
-import { rules, RuleType } from "../lib/rules";
-import { Results } from "../lib/results";
+import { Finding, ScanContext } from "../lib/context";
 import log from "../lib/log";
+import { rules, RuleType } from "../lib/rules";
 
 export default class Scan extends Command {
   static description = "describe the command here";
@@ -21,6 +21,8 @@ export default class Scan extends Command {
   async run() {
     const { args } = (this.parse(Scan) as unknown) as { args: { dir: string } };
 
+    const ctx: ScanContext = { summary: { findings: [] } };
+
     const check = async (
       entry: nodegit.TreeEntry,
       blobString: string,
@@ -33,13 +35,14 @@ export default class Scan extends Command {
         matches.forEach((matched) => {
           blobString.split("\n").forEach((line, i) => {
             if (line.includes(matched)) {
-              const result = {
+              const finding: Finding = {
                 ruleType,
                 detail: `found ${matched} in ${entry.toString()} on line ${
                   i + 1
                 }`,
               };
-              log.warn(`[ ${result.ruleType} ] ${result.detail}`);
+              ctx.summary?.findings.push(finding)
+              log.warn(`[ ${finding.ruleType} ] ${finding.detail}`);
             }
           });
         });
@@ -76,7 +79,7 @@ export default class Scan extends Command {
         const tree = await commit.getTree();
         for (const entry of tree.entries()) await testEntry(entry);
       } catch (e) {
-        log.warn("directory not scanned - check debug log for details")
+        log.warn("directory not scanned - check debug log for details");
         log.debug(e);
       }
     };
@@ -101,6 +104,7 @@ export default class Scan extends Command {
       log.error(e, "SCAN FAILED");
       this.exit(1);
     }
-    log.info("SCAN COMPLETE");
+
+    log.info(`SCAN COMPLETE (found ${ctx.summary?.findings.length} issues)`);
   }
 }
