@@ -9,7 +9,7 @@ git-secret-scanner
 # Installation
 
 ```sh-session
-$ yarn add -g git-secret-scanner
+$ yarn global add git-secret-scanner
 ```
 
 # Commands
@@ -25,12 +25,13 @@ USAGE
   $ git-secret-scanner scan [DIR]
 
 OPTIONS
-  -h, --help    show CLI help
-  -p, --pull    pull from repositories
-  -r, --redact  redact all matched secret strings
+  -d, --dir=dir  directory to scan (current direction if omitted)
+  -h, --help     show CLI help
+  -p, --pull     pull from repositories
+  -r, --redact   redact all matched secret strings
 
 EXAMPLE
-  $ git-secret-scanner scan ~/code/github.com/my-org -r
+  $ git-secret-scanner scan -d ~/code/github.com/my-org -r
   info: [ AWS_SECRET_ACCESS_KEY ] in .env on line 198
   info: [ AWS_ACCESS_KEY_ID ] in .env on line 42
 ```

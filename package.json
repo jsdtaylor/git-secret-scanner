@@ -1,6 +1,6 @@
 {
   "name": "git-secret-scanner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Justin Taylor @jsdtaylor",
   "bin": {
     "git-secret-scanner": "./bin/run"
@@ -45,11 +45,13 @@
   ],
   "homepage": "https://github.com/jsdtaylor/git-secret-scanner",
   "keywords": [
+    "git",
     "secret",
     "scan",
     "repo",
     "security",
-    "password"
+    "password",
+    "check"
   ],
   "license": "MIT",
   "main": "lib/index.js",

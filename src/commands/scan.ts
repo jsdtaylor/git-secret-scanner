@@ -14,6 +14,10 @@ export default class Scan extends Command {
 
   static flags = {
     help: flags.help({ char: "h" }),
+    dir: flags.string({
+      char: "d",
+      description: "directory to scan (current direction if omitted)",
+    }),
     pull: flags.boolean({ char: "p", description: "pull from repositories" }),
     redact: flags.boolean({
       char: "r",
@@ -21,14 +25,8 @@ export default class Scan extends Command {
     }),
   };
 
-  static args = [{ name: "dir" }];
-
   async run() {
-    const { args, flags } = (this.parse(Scan) as unknown) as {
-      args: { dir: string };
-      flags: { pull: boolean; redact: boolean };
-    };
-
+    const { flags } = this.parse(Scan);
     const ctx: ScanContext = { summary: { findings: [] } };
 
     const check = async (
@@ -104,17 +102,20 @@ export default class Scan extends Command {
     };
 
     try {
+      const resolvedDir = path.resolve(flags.dir || ".");
+
       // is this a git repo?
-      const resolvedDir = path.resolve(args.dir);
       const gitDir = path.resolve(resolvedDir, ".git");
+
       log.info(`SCAN STARTED: ${resolvedDir}`);
       log.debug(`checking for ${gitDir}`);
+      
       if (!fs.existsSync(gitDir)) {
         // not a git repo, iterate directories
         log.debug(`${resolvedDir} is not a git repo, digging...`);
         const files = await fs.promises.readdir(resolvedDir);
         for (const file of files) {
-          const fullPath = path.resolve(args.dir, file);
+          const fullPath = path.resolve(resolvedDir, file);
           const stat = await fs.promises.stat(fullPath);
           if (stat.isDirectory()) await scanRepoDir(fullPath);
         }
