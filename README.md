@@ -1,10 +1,9 @@
-git-secret-scanner
-=====================
+# git-secret-scanner
 
-[![npm version](https://badge.fury.io/js/git-secret-scanner.svg)](https://badge.fury.io/js/git-secret-scanner) ![Codecov](https://img.shields.io/codecov/c/github/jsdtaylor/git-secret-scanner)
+[![npm version](https://badge.fury.io/js/git-secret-scanner.svg)](https://badge.fury.io/js/git-secret-scanner) [![Codecov](https://codecov.io/gh/jsdtaylor/git-secret-scanner/branch/main/graph/badge.svg?token=XJO4F5GUWL)](https://codecov.io/gh/jsdtaylor/git-secret-scanner)
 
-* [Installation](#installation)
-* [Commands](#commands)
+- [Installation](#installation)
+- [Commands](#commands)
 
 # Installation
 
@@ -14,7 +13,7 @@ $ yarn global add git-secret-scanner
 
 # Commands
 
-* [`git-secret-scanner scan`](#git-secret-scanner-scan)
+- [`git-secret-scanner scan`](#git-secret-scanner-scan)
 
 ## `git-secret-scanner scan`
 
@@ -38,5 +37,5 @@ EXAMPLE
 # Logs
 
 Logs are written to the console and to `scan.log` (we'll make this configurable soon).
- 
+
 To enable debug logs, set the `LOG_LEVEL` env var to `debug`.
