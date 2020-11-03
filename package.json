@@ -1,6 +1,6 @@
 {
   "name": "git-secret-scanner",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "author": "Justin Taylor @jsdtaylor",
   "bin": {
     "git-secret-scanner": "./bin/run"
@@ -13,6 +13,7 @@
     "@octokit/rest": "^18.0.7",
     "async-exec": "^1.1.0",
     "detect-secrets": "^1.0.6",
+    "glob-to-regexp": "^0.4.1",
     "nodegit": "^0.27.0",
     "tslib": "^1",
     "winston": "^3.3.3"
@@ -67,7 +68,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
-    "test": "nyc --reporter=lcov --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "nyc --reporter=lcov --reporter=text --reporter=text-summary --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md"
   },
   "types": "lib/index.d.ts"

@@ -35,3 +35,9 @@ EXAMPLE
   info: [ AWS_SECRET_ACCESS_KEY ] in .env on line 198
   info: [ AWS_ACCESS_KEY_ID ] in .env on line 42
 ```
+
+# Logs
+
+Logs are written to the console and to `scan.log` (we'll make this configurable soon).
+ 
+To enable debug logs, set the `LOG_LEVEL` env var to `debug`.

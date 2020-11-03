@@ -6,8 +6,8 @@ describe("scan", () => {
     .command(["scan", "-p"])
     .it("fetches remotes then scans the current directory", (ctx) => {
       expect(ctx.stdout).to.contain("fetching from remotes...");
-      expect(ctx.stdout).to.contain("[ AWS_ACCESS_KEY_ID ]");
       expect(ctx.stdout).to.contain("[ PASSWORD ]");
+      expect(ctx.stdout).to.not.contain("[ AWS_ACCESS_KEY_ID ]");
     });
   test
     .stdout()
