@@ -1,7 +1,7 @@
 git-secret-scanner
 =====================
 
-[![npm version](https://badge.fury.io/js/git-secret-scanner.svg)](https://badge.fury.io/js/git-secret-scanner)
+[![npm version](https://badge.fury.io/js/git-secret-scanner.svg)](https://badge.fury.io/js/git-secret-scanner) ![Codecov](https://img.shields.io/codecov/c/github/jsdtaylor/git-secret-scanner)
 
 * [Installation](#installation)
 * [Commands](#commands)
