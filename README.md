@@ -27,7 +27,6 @@ USAGE
 OPTIONS
   -d, --dir=dir  directory to scan (current directory if omitted)
   -h, --help     show CLI help
-  -p, --pull     pull from repositories
   -r, --redact   redact all matched secret strings
 
 EXAMPLE

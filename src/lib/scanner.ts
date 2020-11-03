@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
-import { Commit, Cred, Blame, Repository, TreeEntry } from "nodegit";
+import { Commit, Blame, Repository, TreeEntry } from "nodegit";
 
 import log from "../lib/log";
 import { rules, RuleType } from "../lib/rules";
@@ -17,7 +17,6 @@ export type ScanResult = { findings: ScanResultFinding[] };
 export type ScanContext = {
   rootDirectory: string;
   redactValues: boolean;
-  fetchRemotes: boolean;
   currentRepo?: Repository;
   currentPath?: string;
   result?: ScanResult;
@@ -112,17 +111,6 @@ const openRepo = async (dir: string): Promise<Repository> => {
   }
 };
 
-const fetchAll = async (repo: Repository): Promise<void> =>
-  await repo.fetchAll({
-    callbacks: {
-      certificateCheck: (): number => 0,
-      credentials: (_url: string, user: string): Cred => {
-        log.debug(`fetching from ${_url}`);
-        return Cred.sshKeyFromAgent(user);
-      },
-    },
-  });
-
 const latestCommit = async (repo: Repository): Promise<Commit> => {
   try {
     return await repo.getHeadCommit();
@@ -148,10 +136,6 @@ const scanRepoDir = async (ctx: ScanContext, dir: string): Promise<void> => {
   try {
     ctx.currentRepo = await openRepo(dir);
     ctx.currentPath = dir;
-    if (ctx.fetchRemotes) {
-      log.info("fetching from remotes...");
-      await fetchAll(ctx.currentRepo);
-    }
     const commit = await latestCommit(ctx.currentRepo);
     const branchName = (await ctx.currentRepo.getCurrentBranch()).shorthand();
     log.info(`analysing files at commit ${commit.toString()} (${branchName})`);

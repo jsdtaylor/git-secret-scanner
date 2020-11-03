@@ -13,7 +13,6 @@ export default class Scan extends Command {
       char: "d",
       description: "directory to scan (current direction if omitted)",
     }),
-    pull: flags.boolean({ char: "p", description: "pull from repositories" }),
     redact: flags.boolean({
       char: "r",
       description: "redact all matched secret strings",
@@ -25,7 +24,6 @@ export default class Scan extends Command {
     await run({
       rootDirectory: flags.dir || ".",
       redactValues: flags.redact,
-      fetchRemotes: flags.pull,
     });
   }
 }
