@@ -3,7 +3,7 @@ import * as fs from "fs";
 import { Command, flags } from "@oclif/command";
 import * as nodegit from "nodegit";
 
-import { Finding, ScanContext } from "../lib/context";
+import { BlameFinding, Finding, ScanContext } from "../lib/context";
 import log from "../lib/log";
 import { rules, RuleType } from "../lib/rules";
 
@@ -35,28 +35,58 @@ export default class Scan extends Command {
       ruleType: RuleType
     ): Promise<void> => {
       const rule = rules[ruleType];
-      if (!rule) return;
+      if (!rule || !ctx.currentRepo) return;
       const matches = blobString.match(rule.pattern);
       if (matches && matches.length > 0) {
         log.debug(`[!] found ${matches.length} matches for ${ruleType}`);
-        matches.forEach((matched) => {
-          blobString.split("\n").forEach((line, i) => {
+        const blame = nodegit.Blame.file(ctx.currentRepo, entry.path());
+        for (const matched of matches) {
+          let lineNumber = 0;
+          for (const line of blobString.split("\n")) {
+            lineNumber++;
             if (line.includes(matched)) {
               const valuePart = flags.redact ? "" : `found ${matched} `;
+              let blameFinding: BlameFinding = undefined;
+              const blameHunk = (await blame).getHunkByLine(lineNumber);
+              const blameCommitId = blameHunk.finalCommitId();
+              try {
+                const blameCommit = await ctx.currentRepo!.getCommit(
+                  blameCommitId
+                );
+                blameFinding = {
+                  commit: blameCommit.toString(),
+                  author: {
+                    email: blameCommit.committer().email(),
+                  },
+                  date: blameCommit.date(),
+                };
+              } catch (e) {
+                log.warn(
+                  `tried to blame but the related commit ${blameCommitId} has been deleted`
+                );
+              }
               const finding: Finding = {
                 ruleType,
-                detail: `${valuePart}in ${entry.toString()} on line ${i + 1}`,
+                detail: `${valuePart}in ${entry.toString()} on line ${lineNumber}`,
+                blame: blameFinding,
               };
               ctx.summary?.findings.push(finding);
-              log.warn(`[ ${finding.ruleType} ] ${finding.detail}`);
+              log.warn(
+                `[ ${finding.ruleType} ] ${finding.detail}` +
+                  (finding.blame
+                    ? ` (${finding.blame.commit} by ${
+                        finding.blame.author.email
+                      } at ${finding.blame.date.toISOString()})`
+                    : "")
+              );
             }
-          });
-        });
+          }
+        }
       }
     };
 
     const testEntry = async (entry: nodegit.TreeEntry): Promise<void> => {
-      log.debug(`checking ${entry.toString()}...`);
+      log.debug(`checking ${ctx.currentPath}/${entry.toString()}...`);
       let blob;
       try {
         blob = await entry.getBlob();
@@ -120,13 +150,16 @@ export default class Scan extends Command {
     const scanRepoDir = async (dir: string): Promise<void> => {
       log.info(`scanning ${dir}`);
       try {
-        const repo = await openRepo(dir);
+        ctx.currentRepo = await openRepo(dir);
+        ctx.currentPath = dir;
         if (flags.pull) {
           log.info("fetching from remotes...");
-          await fetchAll(repo);
+          await fetchAll(ctx.currentRepo);
         }
-        const commit = await latestCommit(repo);
-        const branchName = (await repo.getCurrentBranch()).shorthand();
+        const commit = await latestCommit(ctx.currentRepo);
+        const branchName = (
+          await ctx.currentRepo.getCurrentBranch()
+        ).shorthand();
         log.info(
           `analysing files at commit ${commit.toString()} (${branchName})`
         );
