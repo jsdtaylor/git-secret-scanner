@@ -1,6 +1,6 @@
 {
   "name": "git-secret-scanner",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Justin Taylor @jsdtaylor",
   "bin": {
     "git-secret-scanner": "./bin/run"

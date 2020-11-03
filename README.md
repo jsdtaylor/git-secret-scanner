@@ -22,7 +22,7 @@ Scans local git repositories for committed secrets
 
 ```
 USAGE
-  $ git-secret-scanner scan [DIR]
+  $ git-secret-scanner scan -d [DIR]
 
 OPTIONS
   -d, --dir=dir  directory to scan (current directory if omitted)
