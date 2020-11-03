@@ -14,15 +14,15 @@ $ yarn global add git-secret-scanner
 
 # Commands
 
-* [`git-secret-scanner scan DIR`](#git-secret-scanner-scan)
+* [`git-secret-scanner scan`](#git-secret-scanner-scan)
 
-## `git-secret-scanner scan DIR`
+## `git-secret-scanner scan`
 
 Scans local git repositories for committed secrets
 
 ```
 USAGE
-  $ git-secret-scanner scan -d [DIR]
+  $ git-secret-scanner scan [-d dirname]
 
 OPTIONS
   -d, --dir=dir  directory to scan (current directory if omitted)
