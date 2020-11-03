@@ -33,7 +33,7 @@ const check = async (
   const matches = blobString.match(rule.pattern);
   if (matches) {
     log.debug(`[!] found ${matches.length} matches for ${ruleType}`);
-    const blame = Blame.file(ctx.currentRepo, entry.path());
+    const blame = await Blame.file(ctx.currentRepo, entry.path());
     for (const matched of matches) {
       if (rule.antipattern !== undefined && rule.antipattern.test(matched)) {
         log.debug(`match excluded by antipattern rule ${rule.antipattern}`);
