@@ -25,7 +25,7 @@ export default class Scan extends Command {
     }),
   };
 
-  async run() {
+  async run(): Promise<void> {
     const { flags } = this.parse(Scan);
     const ctx: ScanContext = { summary: { findings: [] } };
 
@@ -33,9 +33,10 @@ export default class Scan extends Command {
       entry: nodegit.TreeEntry,
       blobString: string,
       ruleType: RuleType
-    ) => {
+    ): Promise<void> => {
       const rule = rules[ruleType];
-      const matches = blobString.match(rule!.pattern);
+      if (!rule) return;
+      const matches = blobString.match(rule.pattern);
       if (matches && matches.length > 0) {
         log.debug(`[!] found ${matches.length} matches for ${ruleType}`);
         matches.forEach((matched) => {
@@ -54,7 +55,7 @@ export default class Scan extends Command {
       }
     };
 
-    const testEntry = async (entry: nodegit.TreeEntry) => {
+    const testEntry = async (entry: nodegit.TreeEntry): Promise<void> => {
       log.debug(`checking ${entry.toString()}...`);
       let blob;
       try {
@@ -75,26 +76,62 @@ export default class Scan extends Command {
       }
     };
 
-    const scanRepoDir = async (dir: string) => {
+    const openRepo = async (dir: string): Promise<nodegit.Repository> => {
+      try {
+        return await nodegit.Repository.open(path.resolve(dir));
+      } catch (e) {
+        log.error("failed to open repository");
+        throw e;
+      }
+    };
+
+    const fetchAll = async (repo: nodegit.Repository): Promise<void> =>
+      await repo.fetchAll({
+        callbacks: {
+          certificateCheck: (): number => 0,
+          credentials: (_url: string, user: string): nodegit.Cred => {
+            log.debug(`fetching from ${_url}`);
+            return nodegit.Cred.sshKeyFromAgent(user);
+          },
+        },
+      });
+
+    const latestCommit = async (
+      repo: nodegit.Repository
+    ): Promise<nodegit.Commit> => {
+      try {
+        return await repo.getHeadCommit();
+      } catch (e) {
+        log.error("failed to get latest HEAD commit");
+        throw e;
+      }
+    };
+
+    const checkTreeEntries = async (
+      entries: nodegit.TreeEntry[]
+    ): Promise<void> => {
+      for (const entry of entries) {
+        if (entry.isTree())
+          await checkTreeEntries((await entry.getTree()).entries());
+        await testEntry(entry);
+      }
+    };
+
+    const scanRepoDir = async (dir: string): Promise<void> => {
       log.info(`scanning ${dir}`);
       try {
-        const repo = await nodegit.Repository.open(path.resolve(dir));
+        const repo = await openRepo(dir);
         if (flags.pull) {
           log.info("fetching from remotes...");
-          await repo.fetchAll({
-            callbacks: {
-              certificateCheck: () => 0,
-              credentials: (_url: string, user: string) => {
-                log.debug(`fetching from ${_url}`);
-                return nodegit.Cred.sshKeyFromAgent(user);
-              },
-            },
-          });
+          await fetchAll(repo);
         }
-        const commit = await repo.getMasterCommit();
-        log.info(`analysing files at commit ${commit.toString()}`);
+        const commit = await latestCommit(repo);
+        const branchName = (await repo.getCurrentBranch()).shorthand();
+        log.info(
+          `analysing files at commit ${commit.toString()} (${branchName})`
+        );
         const tree = await commit.getTree();
-        for (const entry of tree.entries()) await testEntry(entry);
+        await checkTreeEntries(tree.entries());
       } catch (e) {
         log.warn("directory not scanned - check debug log for details");
         log.debug(e);
@@ -109,7 +146,7 @@ export default class Scan extends Command {
 
       log.info(`SCAN STARTED: ${resolvedDir}`);
       log.debug(`checking for ${gitDir}`);
-      
+
       if (!fs.existsSync(gitDir)) {
         // not a git repo, iterate directories
         log.debug(`${resolvedDir} is not a git repo, digging...`);

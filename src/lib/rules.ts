@@ -19,11 +19,13 @@ export type Rules = Partial<Record<RuleType, Rule>>;
 export const rules: Rules = {
   API_KEY: {
     name: "API key",
-    pattern: /((?:\"|')?\S*(?:API_KEY)\S*(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?.*(?:\"|')?)/g,
+    pattern: /((?:"|')?\S*(?:API_KEY)\S*(?:"|')?\s*(?::|=>|=)\s*(?:"|')?.*(?:"|')?)/g,
+    filterEntry: /.*\.ini|\.env.*/i,
   },
   API_TOKEN: {
     name: "API token",
-    pattern: /((?:\"|')?\S*(?:API_TOKEN)\S*(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?.*(?:\"|')?)/g,
+    pattern: /((?:"|')?\S*(?:API_TOKEN)\S*(?:"|')?\s*(?::|=>|=)\s*(?:"|')?.*(?:"|')?)/g,
+    filterEntry: /.*\.ini|\.env.*/i,
   },
   AWS_ACCESS_KEY_ID: {
     name: "AWS Access Key ID",
@@ -31,11 +33,11 @@ export const rules: Rules = {
   },
   AWS_SECRET_ACCESS_KEY: {
     name: "AWS Secret Access Key",
-    pattern: /((?:\"|')?(?:aws)?_?(?:secret)_?(?:access)?_?(?:key)(?:\"|')?\s*(?::|=>|=)\s*(?:\"|')?[a-z0-9/\+=]{40}(?:\"|')?)/gi,
+    pattern: /((?:"|')?(?:aws)?_?(?:secret)_?(?:access)?_?(?:key)(?:"|')?\s*(?::|=>|=)\s*(?:"|')?[a-z0-9/+=]{40}(?:"|')?)/gi,
   },
   PASSWORD: {
     name: "Password",
-    pattern: /((?:password|_pass|_pw)[^\S\r\n]*(?::|=>|=)[^\S\r\n]*(?:(?!\"\"|\'\'|null).)+)/gi,
+    pattern: /((?:password|_pass|_pw)[^\S\r\n]*(?::|=>|=)[^\S\r\n]*(?:(?!""|''|null).)+)/gi,
     filterEntry: /.*\.ini|\.env.*/i,
   },
 };
