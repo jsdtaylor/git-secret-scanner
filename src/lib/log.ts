@@ -1,18 +1,34 @@
-import * as winston from "winston";
+import {
+  createLogger as createWinstonLogger,
+  format,
+  transports as winstonTransports,
+  Logger,
+} from "winston";
+import {
+  ConsoleTransportInstance,
+  FileTransportInstance,
+} from "winston/lib/winston/transports";
 
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || "info",
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.Console({
-      format: winston.format.simple(),
-    }),
-    new winston.transports.File({
-      filename: "scan.log",
-      format: winston.format.simple(),
-      options: { flags: "w" },
-    }),
-  ],
+const { combine, printf, timestamp } = format;
+const logFormat = printf(({ level, message, timestamp }) => {
+  return `${timestamp} [${level}] ${message}`;
 });
+const createLogger = (createLogFiles: boolean): Logger => {
+  const transports: Array<ConsoleTransportInstance | FileTransportInstance> = [
+    new winstonTransports.Console({}),
+  ];
+  if (createLogFiles)
+    transports.push(
+      new winstonTransports.File({
+        filename: `${new Date().toISOString()}.log`,
+        options: { flags: "w" },
+      })
+    );
+  return createWinstonLogger({
+    level: process.env.LOG_LEVEL || "info",
+    format: combine(timestamp(), logFormat),
+    transports,
+  });
+};
 
-export default logger;
+export { createLogger, Logger };

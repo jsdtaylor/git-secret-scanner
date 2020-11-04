@@ -1,5 +1,8 @@
 import { Command, flags } from "@oclif/command";
 
+import { clone, rmDirSync, tempDir } from "../lib/cloner";
+import { orgRepoUrls } from "../lib/github";
+import { createLogger } from "../lib/log";
 import { run } from "../lib/scanner";
 
 export default class Scan extends Command {
@@ -12,16 +15,64 @@ export default class Scan extends Command {
     dir: flags.string({
       char: "d",
       description: "directory to scan (current direction if omitted)",
+      exclusive: ["url"],
     }),
     redact: flags.boolean({
       char: "r",
       description: "redact all matched secret strings",
     }),
+    githubOrgName: flags.string({
+      char: "g",
+      description: "clone all repositories from this GitHub org",
+      exclusive: ["dir"],
+    }),
+    createLogFiles: flags.boolean({
+      char: "l",
+      description: "create log files",
+    }),
   };
 
   async run(): Promise<void> {
     const { flags } = this.parse(Scan);
+
+    const log = createLogger(flags.createLogFiles);
+
+    if (flags.githubOrgName) {
+      // create a temp directory to clone into
+      const cloneDir = tempDir();
+
+      // set the scan context
+      const ctx = {
+        log,
+        rootDirectory: cloneDir,
+        redactValues: flags.redact,
+      };
+
+      // clone all organisation repositories
+      const repos = await orgRepoUrls(ctx, flags.githubOrgName);
+      log.info(`about to clone ${repos.length} repositories`);
+      let cloned = 0;
+      for (const repo of repos) {
+        try {
+          await clone(ctx, repo);
+          cloned++;
+        } catch (e) {
+          log.error(`failed to clone ${repo}`);
+        }
+      }
+      log.info(`cloned ${cloned} of ${repos.length} repositories`);
+
+      // run a scan on all repositories in the temp directory
+      await run(ctx);
+
+      // we don't need this temp directory anymore
+      rmDirSync(cloneDir);
+
+      return;
+    }
+
     await run({
+      log,
       rootDirectory: flags.dir || ".",
       redactValues: flags.redact,
     });

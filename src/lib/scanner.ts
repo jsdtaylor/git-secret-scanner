@@ -2,7 +2,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { Commit, Blame, Repository, TreeEntry } from "nodegit";
 
-import log from "../lib/log";
+import { Logger } from "../lib/log";
 import { rules, RuleType } from "../lib/rules";
 
 export type ScanResultFindingBlame =
@@ -15,6 +15,7 @@ export type ScanResultFinding = {
 };
 export type ScanResult = { findings: ScanResultFinding[] };
 export type ScanContext = {
+  log: Logger;
   rootDirectory: string;
   redactValues: boolean;
   currentRepo?: Repository;
@@ -32,11 +33,11 @@ const check = async (
   if (!rule || !ctx.currentRepo) return;
   const matches = blobString.match(rule.pattern);
   if (matches) {
-    log.debug(`[!] found ${matches.length} matches for ${ruleType}`);
+    ctx.log.debug(`[!] found ${matches.length} matches for ${ruleType}`);
     const blame = await Blame.file(ctx.currentRepo, entry.path());
     for (const matched of matches) {
       if (rule.antipattern !== undefined && rule.antipattern.test(matched)) {
-        log.debug(`match excluded by antipattern rule ${rule.antipattern}`);
+        ctx.log.debug(`match excluded by antipattern rule ${rule.antipattern}`);
         continue;
       }
       let lineNumber = 0;
@@ -57,7 +58,7 @@ const check = async (
               date: blameCommit.date(),
             };
           } catch (e) {
-            log.warn(
+            ctx.log.warn(
               `tried to blame but the related commit ${blameCommitId} has been deleted`
             );
           }
@@ -67,7 +68,7 @@ const check = async (
             blame: blameFinding,
           };
           ctx.result?.findings.push(finding);
-          log.warn(
+          ctx.log.warn(
             `[ ${finding.ruleType} ] ${finding.detail}` +
               (finding.blame
                 ? ` (${finding.blame.commit} by ${
@@ -82,12 +83,12 @@ const check = async (
 };
 
 const testEntry = async (ctx: ScanContext, entry: TreeEntry): Promise<void> => {
-  log.debug(`checking ${ctx.currentPath}/${entry.toString()}...`);
+  ctx.log.debug(`checking ${ctx.currentPath}/${entry.toString()}...`);
   let blob;
   try {
     blob = await entry.getBlob();
   } catch (e) {
-    log.debug("no blob data");
+    ctx.log.debug("no blob data");
     return;
   }
   try {
@@ -98,24 +99,24 @@ const testEntry = async (ctx: ScanContext, entry: TreeEntry): Promise<void> => {
         await check(ctx, entry, blobString, ruleType as RuleType);
     }
   } catch (e) {
-    log.error(e);
+    ctx.log.error(e);
   }
 };
 
-const openRepo = async (dir: string): Promise<Repository> => {
+const openRepo = async (ctx: ScanContext, dir: string): Promise<Repository> => {
   try {
     return await Repository.open(path.resolve(dir));
   } catch (e) {
-    log.error("failed to open repository");
+    ctx.log.error("failed to open repository");
     throw e;
   }
 };
 
-const latestCommit = async (repo: Repository): Promise<Commit> => {
+const latestCommit = async (ctx: ScanContext): Promise<Commit> => {
   try {
-    return await repo.getHeadCommit();
+    return await ctx.currentRepo!.getHeadCommit();
   } catch (e) {
-    log.error("failed to get latest HEAD commit");
+    ctx.log.error("failed to get latest HEAD commit");
     throw e;
   }
 };
@@ -132,18 +133,20 @@ const checkTreeEntries = async (
 };
 
 const scanRepoDir = async (ctx: ScanContext, dir: string): Promise<void> => {
-  log.info(`scanning ${dir}`);
+  ctx.log.info(`scanning ${dir}`);
   try {
-    ctx.currentRepo = await openRepo(dir);
+    ctx.currentRepo = await openRepo(ctx, dir);
     ctx.currentPath = dir;
-    const commit = await latestCommit(ctx.currentRepo);
+    const commit = await latestCommit(ctx);
     const branchName = (await ctx.currentRepo.getCurrentBranch()).shorthand();
-    log.info(`analysing files at commit ${commit.toString()} (${branchName})`);
+    ctx.log.info(
+      `analysing files at commit ${commit.toString()} (${branchName})`
+    );
     const tree = await commit.getTree();
     await checkTreeEntries(ctx, tree.entries());
   } catch (e) {
-    log.warn("directory not scanned - check debug log for details");
-    log.debug(e);
+    ctx.log.warn("directory not scanned - check debug log for details");
+    ctx.log.debug(e);
   }
 };
 
@@ -154,8 +157,8 @@ export const run = async (ctx: ScanContext): Promise<void> => {
     // get a handle on the .git directory
     const gitDir = path.resolve(resolvedDir, ".git");
 
-    log.info(`SCAN STARTED: ${resolvedDir}`);
-    log.debug(`checking for ${gitDir}`);
+    ctx.log.info(`SCAN STARTED: ${resolvedDir}`);
+    ctx.log.debug(`checking for ${gitDir}`);
 
     // initialise result
     ctx.result = { findings: [] };
@@ -163,7 +166,7 @@ export const run = async (ctx: ScanContext): Promise<void> => {
     // is this a git repo?
     if (!fs.existsSync(gitDir)) {
       // not a git repo, iterate directories
-      log.debug(`${resolvedDir} is not a git repo, digging...`);
+      ctx.log.debug(`${resolvedDir} is not a git repo, digging...`);
       const files = await fs.promises.readdir(resolvedDir);
       for (const file of files) {
         const fullPath = path.resolve(resolvedDir, file);
@@ -172,9 +175,9 @@ export const run = async (ctx: ScanContext): Promise<void> => {
       }
     } else await scanRepoDir(ctx, resolvedDir);
   } catch (e) {
-    log.error(e, "SCAN FAILED");
+    ctx.log.error(e, "SCAN FAILED");
     throw e;
   }
 
-  log.info(`SCAN COMPLETE (found ${ctx.result.findings.length} issues)`);
+  ctx.log.info(`SCAN COMPLETE (found ${ctx.result.findings.length} issues)`);
 };
