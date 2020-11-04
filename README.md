@@ -38,6 +38,6 @@ EXAMPLE
 
 # Logs
 
-Logs are written to the console and to `scan.log` (we'll make this configurable soon).
+Logs are written to the console and to `scan.log` when the `--createLogFiles` flag is set.
 
 To enable debug logs, set the `LOG_LEVEL` env var to `debug`.
