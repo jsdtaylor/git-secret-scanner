@@ -24,7 +24,7 @@ USAGE
   $ git-secret-scanner scan [-d dirname]
 
 OPTIONS
-  -d, --dir=dir                      directory to scan (current direction if omitted)
+  -d, --dir=dir                      directory to scan (uses current directory if omitted)
   -g, --githubOrgName=githubOrgName  clone all repositories from this GitHub org
   -h, --help                         show CLI help
   -l, --createLogFiles               create log files
