@@ -19,6 +19,7 @@ export type ScanContext = {
   rootDirectory: string;
   redactValues: boolean;
   currentRepo?: Repository;
+  currentRepoName?: string;
   currentPath?: string;
   result?: ScanResult;
 };
@@ -69,7 +70,7 @@ const check = async (
           };
           ctx.result?.findings.push(finding);
           ctx.log.warn(
-            `[ ${finding.ruleType} ] ${finding.detail}` +
+            `(${ctx.currentRepoName}) [${finding.ruleType}] ${finding.detail}` +
               (finding.blame
                 ? ` (${finding.blame.commit} by ${
                     finding.blame.author.email
@@ -132,11 +133,17 @@ const checkTreeEntries = async (
   }
 };
 
+const repoNameFromPath = (path: string): string => {
+  const pathParts = path.split("/");
+  return pathParts[pathParts.length - 1];
+};
+
 const scanRepoDir = async (ctx: ScanContext, dir: string): Promise<void> => {
   ctx.log.info(`scanning ${dir}`);
   try {
     ctx.currentRepo = await openRepo(ctx, dir);
     ctx.currentPath = dir;
+    ctx.currentRepoName = repoNameFromPath(dir);
     const commit = await latestCommit(ctx);
     const branchName = (await ctx.currentRepo.getCurrentBranch()).shorthand();
     ctx.log.info(

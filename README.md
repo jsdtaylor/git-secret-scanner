@@ -33,8 +33,11 @@ OPTIONS
 
 EXAMPLE
   $ git-secret-scanner scan -rlo ~/logs -d ~/code/github.com/my-org
-  info: [ AWS_SECRET_ACCESS_KEY ] in .env on line 198
-  info: [ AWS_ACCESS_KEY_ID ] in .env on line 42
+  2020-11-05T09:14:01.619Z [info] SCAN STARTED: ~/code/github.com/jsdtaylor/github-secret-scanner
+  2020-11-05T09:14:01.620Z [info] scanning ~/code/github.com/jsdtaylor/github-secret-scanner
+  2020-11-05T09:14:01.622Z [info] analysing files at commit 66f005f82edc4684559df25a74d859583572dd9f (main)
+  2020-11-05T09:14:01.641Z [warn] (github-secret-scanner) [AWS_ACCESS_KEY_ID] found AKIAIOSFODNN7OSFODNN in test/commands/scan.test.ts on line 15 (f8e28a25a59d4e727f132f831fbb926ac68047cb by jsdtaylor@me.com at 2020-11-04T16:06:09.000Z)
+  2020-11-05T09:14:01.641Z [warn] (github-secret-scanner) [AWS_ACCESS_KEY_ID] found AKIAIOSFODNN7OSFODNN in test/commands/scan.test.ts on line 22 (4f35f8a6d9234cdc3688e914ac52b3bf8a5c0012 by jsdtaylor@me.com at 2020-11-03T20:57:26.000Z)
 ```
 
 # Logs
