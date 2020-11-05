@@ -30,12 +30,16 @@ export default class Scan extends Command {
       char: "l",
       description: "create log files",
     }),
+    outputDir: flags.string({
+      char: "o",
+      description: "output directory (log files)",
+    }),
   };
 
   async run(): Promise<void> {
     const { flags } = this.parse(Scan);
 
-    const log = createLogger(flags.createLogFiles);
+    const log = createLogger(flags.createLogFiles, flags.outputDir);
 
     if (flags.githubOrgName) {
       // create a temp directory to clone into

@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import {
   createLogger as createWinstonLogger,
   format,
@@ -13,14 +15,16 @@ const { combine, printf, timestamp } = format;
 const logFormat = printf(({ level, message, timestamp }) => {
   return `${timestamp} [${level}] ${message}`;
 });
-const createLogger = (createLogFiles: boolean): Logger => {
+const createLogger = (createLogFiles: boolean, outputDir?: string): Logger => {
   const transports: Array<ConsoleTransportInstance | FileTransportInstance> = [
     new winstonTransports.Console({}),
   ];
+  const dir = path.resolve(outputDir || ".");
+  if (!fs.existsSync(dir)) throw new Error("output directory does not exist");
   if (createLogFiles)
     transports.push(
       new winstonTransports.File({
-        filename: `${new Date().toISOString()}.log`,
+        filename: `${dir}/${new Date().toISOString()}.log`,
         options: { flags: "w" },
       })
     );
