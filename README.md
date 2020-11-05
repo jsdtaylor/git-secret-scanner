@@ -24,14 +24,15 @@ USAGE
   $ git-secret-scanner scan [OPTIONS]
 
 OPTIONS
-  -d, --dir=dir                      directory to scan (uses current directory if omitted)
+  -d, --dir=dir                      directory to scan (current direction if omitted)
   -g, --githubOrgName=githubOrgName  clone all repositories from this GitHub org
   -h, --help                         show CLI help
   -l, --createLogFiles               create log files
+  -o, --outputDir=outputDir          output directory (log files)
   -r, --redact                       redact all matched secret strings
 
 EXAMPLE
-  $ git-secret-scanner scan -d ~/code/github.com/my-org -r
+  $ git-secret-scanner scan -rlo ~/logs -d ~/code/github.com/my-org
   info: [ AWS_SECRET_ACCESS_KEY ] in .env on line 198
   info: [ AWS_ACCESS_KEY_ID ] in .env on line 42
 ```
