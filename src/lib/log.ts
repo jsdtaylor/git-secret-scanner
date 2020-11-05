@@ -24,7 +24,9 @@ const createLogger = (createLogFiles: boolean, outputDir?: string): Logger => {
   if (createLogFiles)
     transports.push(
       new winstonTransports.File({
-        filename: `${dir}/${new Date().toISOString()}.log`,
+        filename: `${dir}/gss-${new Date()
+          .toISOString()
+          .replace(/[-:.]/g, "")}.log`,
         options: { flags: "w" },
       })
     );
