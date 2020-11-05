@@ -32,7 +32,7 @@ OPTIONS
   -r, --redact                       redact all matched secret strings
 
 EXAMPLE
-  $ git-secret-scanner scan -rlo ~/logs -d ~/code/github.com/my-org
+  $ git-secret-scanner scan -lo ~/logs -d ~/code/github.com/my-org
   2020-11-05T09:14:01.619Z [info] SCAN STARTED: ~/code/github.com/jsdtaylor/github-secret-scanner
   2020-11-05T09:14:01.620Z [info] scanning ~/code/github.com/jsdtaylor/github-secret-scanner
   2020-11-05T09:14:01.622Z [info] analysing files at commit 66f005f82edc4684559df25a74d859583572dd9f (main)
