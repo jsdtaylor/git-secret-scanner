@@ -55,7 +55,7 @@ export default class Scan extends Command {
 
       // clone all organisation repositories
       const repos = await orgRepoUrls(ctx, flags.githubOrgName);
-      log.info(`about to clone ${repos.length} repositories`);
+      log.info(`cloning ${repos.length} repositories`);
       let cloned = 0;
       const progress = new SingleBar({}, Presets.shades_classic);
       progress.start(repos.length, 0);
