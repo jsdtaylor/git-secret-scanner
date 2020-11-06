@@ -57,6 +57,7 @@ export default class Scan extends Command {
       const repos = await orgRepoUrls(ctx, flags.githubOrgName);
       log.info(`cloning ${repos.length} repositories`);
       let cloned = 0;
+      const cloneFailures = [];
       const progress = new SingleBar({}, Presets.shades_classic);
       progress.start(repos.length, 0);
       for (const repo of repos) {
@@ -65,10 +66,14 @@ export default class Scan extends Command {
           cloned++;
           progress.update(cloned);
         } catch (e) {
-          log.error(`failed to clone ${repo}`);
+          log.debug(`cloning failed for ${repo}`, e);
+          cloneFailures.push(repo);
         }
       }
       progress.stop();
+      cloneFailures.forEach((failure) =>
+        log.error(`failed to clone ${failure}`)
+      );
       log.info(`cloned ${cloned} of ${repos.length} repositories`);
 
       // run a scan on all repositories in the temp directory
