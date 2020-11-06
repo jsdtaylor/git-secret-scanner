@@ -25,7 +25,7 @@ USAGE
 
 OPTIONS
   -d, --dir=dir                      directory to scan (current direction if omitted)
-  -g, --githubOrgName=githubOrgName  clone all repositories from this GitHub org
+  -g, --githubOrgName=githubOrgName  clone all repositories from this GitHub org (requires GITHUB_ACCESS_TOKEN env var)
   -h, --help                         show CLI help
   -l, --createLogFiles               create log files
   -o, --outputDir=outputDir          output directory (log files)
