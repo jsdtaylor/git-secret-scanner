@@ -1,4 +1,5 @@
 import { Command, flags } from "@oclif/command";
+import { Presets, SingleBar } from "cli-progress";
 
 import { clone, rmDirSync, tempDir } from "../lib/cloner";
 import { orgRepoUrls } from "../lib/github";
@@ -56,14 +57,18 @@ export default class Scan extends Command {
       const repos = await orgRepoUrls(ctx, flags.githubOrgName);
       log.info(`about to clone ${repos.length} repositories`);
       let cloned = 0;
+      const progress = new SingleBar({}, Presets.shades_classic);
+      progress.start(repos.length, 0);
       for (const repo of repos) {
         try {
           await clone(ctx, repo);
           cloned++;
+          progress.update(cloned);
         } catch (e) {
           log.error(`failed to clone ${repo}`);
         }
       }
+      progress.stop();
       log.info(`cloned ${cloned} of ${repos.length} repositories`);
 
       // run a scan on all repositories in the temp directory

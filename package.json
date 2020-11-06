@@ -1,6 +1,6 @@
 {
   "name": "git-secret-scanner",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "author": "Justin Taylor @jsdtaylor",
   "bin": {
     "git-secret-scanner": "./bin/run"
@@ -12,6 +12,7 @@
     "@oclif/plugin-help": "^3",
     "@octokit/rest": "^18.0.9",
     "async-exec": "^1.1.0",
+    "cli-progress": "^3.8.2",
     "detect-secrets": "^1.0.6",
     "nodegit": "^0.27.0",
     "tempy": "^1.0.0",
@@ -22,6 +23,7 @@
     "@oclif/dev-cli": "^1",
     "@oclif/test": "^1",
     "@types/chai": "^4",
+    "@types/cli-progress": "^3.8.0",
     "@types/mocha": "^5",
     "@types/node": "^10",
     "@types/nodegit": "^0.26.12",
